@@ -1,0 +1,12 @@
+{
+  "name": "mariana-cloud-portfolio",
+  "private": true,
+  "version": "2.0.0",
+  "type": "module",
+  "engines": { "node": ">=20" },
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "test": "node --test tests/site.test.mjs",
+    "start": "node scripts/serve.mjs"
+  }
+}

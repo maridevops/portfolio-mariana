@@ -1,1 +1,46 @@
-(()=>{'use strict';const allowed=['pt','en'];const params=new URLSearchParams(location.search);let saved;try{saved=localStorage.getItem('portfolio-language')}catch{}let lang=allowed.includes(params.get('lang'))?params.get('lang'):allowed.includes(saved)?saved:'pt';const descriptions={pt:'Mariana Viana — Engenheira de Cloud e Plataforma. AWS, Azure, GCP, Terraform, CI/CD e confiabilidade. Experiência, projetos e contato.',en:'Mariana Viana — Cloud and Platform Engineer. AWS, Azure, GCP, Terraform, CI/CD and reliability. Experience, projects and contact.'};function applyLanguage(next){lang=allowed.includes(next)?next:'pt';document.documentElement.lang=lang==='pt'?'pt-BR':'en';document.querySelectorAll('[data-pt][data-en]').forEach(el=>{el.textContent=el.dataset[lang]});document.querySelectorAll('[data-lang]').forEach(button=>button.setAttribute('aria-pressed',String(button.dataset.lang===lang)));document.querySelectorAll('.cv-link,.back-link').forEach(link=>{const url=new URL(link.getAttribute('href'),location.href);url.searchParams.set('lang',lang);link.setAttribute('href',url.pathname.split('/').pop()+url.search+url.hash)});const nav=document.querySelector('[data-nav-label]');if(nav)nav.setAttribute('aria-label',lang==='pt'?'Navegação principal':'Main navigation');const impact=document.querySelector('[data-impact-label]');if(impact)impact.setAttribute('aria-label',lang==='pt'?'Resultados profissionais':'Professional outcomes');const description=document.querySelector('meta[name="description"]');if(description)description.setAttribute('content',descriptions[lang]);const og=document.querySelector('meta[property="og:description"]');if(og)og.setAttribute('content',descriptions[lang]);document.title=document.body.classList.contains('cv-page')?'Mariana Viana | '+(lang==='pt'?'Currículo':'Résumé'):'Mariana Viana | Cloud & Platform Engineer';const url=new URL(location.href);url.searchParams.set('lang',lang);try{history.replaceState(null,'',url);localStorage.setItem('portfolio-language',lang)}catch{}}document.querySelectorAll('[data-lang]').forEach(button=>button.addEventListener('click',()=>applyLanguage(button.dataset.lang)));document.querySelector('.print-button')?.addEventListener('click',()=>window.print());applyLanguage(lang)})();
+(() => {
+  const language = new URLSearchParams(location.search).get('lang');
+  if (language === 'en' || language === 'pt' || language === 'pt-BR') {
+    const isCV = /\/cv(?:\.html)?\/?$/.test(location.pathname);
+    const prefix = language === 'en' ? '/' : '/pt/';
+    const target = new URL(prefix + (isCV ? 'cv.html' : ''), location.origin);
+    const params = new URLSearchParams(location.search);
+    params.delete('lang');
+    target.search = params.toString();
+    target.hash = location.hash;
+    location.replace(target.href);
+    return;
+  }
+  document.querySelectorAll('[data-language]').forEach(link => {
+    const target = new URL(link.href);
+    target.hash = location.hash;
+    link.href = target.href;
+    link.addEventListener('click', () => {
+      const current = new URL(link.href);
+      current.hash = location.hash;
+      link.href = current.href;
+    });
+  });
+  const toggle = document.querySelector('.menu-toggle');
+  const nav = document.querySelector('#main-navigation');
+  if (toggle && nav) {
+    document.documentElement.classList.add('js');
+    const close = () => {
+      toggle.setAttribute('aria-expanded', 'false');
+      nav.classList.remove('is-open');
+    };
+    toggle.addEventListener('click', () => {
+      const opened = toggle.getAttribute('aria-expanded') !== 'true';
+      toggle.setAttribute('aria-expanded', String(opened));
+      nav.classList.toggle('is-open', opened);
+    });
+    nav.querySelectorAll('a').forEach(link => link.addEventListener('click', close));
+    document.addEventListener('keydown', event => {
+      if (event.key === 'Escape' && toggle.getAttribute('aria-expanded') === 'true') {
+        close();
+        toggle.focus();
+      }
+    });
+  }
+  document.querySelector('[data-print]')?.addEventListener('click', () => window.print());
+})();
